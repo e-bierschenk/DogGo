@@ -42,7 +42,8 @@ namespace DogGo.Controllers
             {
                 Walk = new Walk(),
                 Dogs = _dogRepository.GetAllDogs(),
-                Walkers = _walkerRepository.GetAllWalkers()
+                Walkers = _walkerRepository.GetAllWalkers(),
+                ChosenDogIds = new List<int>()
             };
             return View(vm);
         }
@@ -50,16 +51,20 @@ namespace DogGo.Controllers
         // POST: WalksController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Walk walk)
+        public ActionResult Create(WalkFormViewModel vm)
         {
             try
             {
-                _walkRepository.AddWalk(walk);
+                foreach (int dogId in vm.ChosenDogIds)
+                {
+                    vm.Walk.DogId = dogId;
+                    _walkRepository.AddWalk(vm.Walk);
+                }
                 return RedirectToAction("Index");
             }
             catch (Exception)
             {
-                return View(walk);
+                return View(vm);
             }
         }
 
@@ -84,19 +89,33 @@ namespace DogGo.Controllers
             }
         }
 
-        // GET: WalksController/Delete/5
-        public ActionResult Delete(int id)
+        // GET: WalksController/Delete
+        public ActionResult Delete()
         {
-            return View();
+            WalkDeleteViewModel vm = new WalkDeleteViewModel
+            {
+                Walks = _walkRepository.GetAll()
+            };
+
+            vm.ChosenWalkIds = new bool[vm.Walks.Count];
+            return View(vm);
         }
+
 
         // POST: WalksController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(WalkDeleteViewModel vm)
         {
             try
             {
+                for (int i = 0; i < vm.ChosenWalkIds.Length; i++)
+                {
+                    if (vm.ChosenWalkIds[i] == true)
+                    {
+                        _walkRepository.DeleteWalk(i + 1);
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch

@@ -13,8 +13,8 @@ namespace DogGo.Repositories
             _config = config;
         }
 
-        public SqlConnection Connection 
-        { 
+        public SqlConnection Connection
+        {
             get
             {
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -26,13 +26,13 @@ namespace DogGo.Repositories
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
-                 using (SqlCommand cmd = conn.CreateCommand())
+                using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT Id, Date, Duration, WalkerId, DogId FROM Walks";
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         List<Walk> walks = new List<Walk>();
-                        while(reader.Read())
+                        while (reader.Read())
                         {
                             Walk walk = new Walk
                             {
@@ -72,10 +72,10 @@ namespace DogGo.Repositories
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         List<Walk> walks = new List<Walk>();
-                        while(reader.Read())
+                        while (reader.Read())
                         {
                             Walk walk = new Walk
-                            { 
+                            {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Date = reader.GetDateTime(reader.GetOrdinal("Date")),
                                 Duration = reader.GetInt32(reader.GetOrdinal("Duration")),
@@ -101,12 +101,35 @@ namespace DogGo.Repositories
 
         public void AddWalk(Walk walk)
         {
-            using(SqlConnection conn = Connection)
+            using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"";
+                    cmd.CommandText = @"INSERT INTO Walks (Date, Duration, WalkerId, DogId)
+                                        OUTPUT INSERTED.ID
+                                        VALUES (@date, @duration, @walker, @dog)";
+                    cmd.Parameters.AddWithValue("@date", walk.Date);
+                    cmd.Parameters.AddWithValue("@duration", walk.Duration);
+                    cmd.Parameters.AddWithValue("@walker", walk.WalkerId);
+                    cmd.Parameters.AddWithValue("@dog", walk.DogId);
+
+                    walk.Id = (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
+        public void DeleteWalk(int walkId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"DELETE FROM Walks WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", walkId);
+
+                    cmd.ExecuteNonQuery();
                 }
             }
         }

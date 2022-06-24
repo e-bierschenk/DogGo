@@ -13,27 +13,37 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <input asp-for="@Model.Walk.Id" class="form-control" type="hidden"/>
+                <input asp-for="Walk.Id" class="form-control" type="hidden" />
             </div>
             <div class="form-group">
-                <label asp-for="@Model.Walk.Date" class="control-label"></label>
-                <input asp-for="@Model.Walk.Date" class="form-control" />
-                <span asp-validation-for="@Model.Walk.Id" class="text-danger"></span>
+                <label asp-for="Walk.Date" class="control-label"></label>
+                <input asp-for="Walk.Date" class="form-control" value="@DateTime.Now.Date"/>
+                <span asp-validation-for="Walk.Date" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="@Model.Walk.Duration" class="control-label"></label>
-                <input asp-for="@Model.Walk.Duration" class="form-control" />
-                <span asp-validation-for="@Model.Walk.Duration" class="text-danger"></span>
+                <label asp-for="Walk.Duration" class="control-label"></label>
+                <input asp-for="Walk.Duration" class="form-control" />
+                <span asp-validation-for="Walk.Duration" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="@Model.Walk.WalkerId" class="control-label"></label>
-                <input asp-for="@Model.Walk.WalkerId" class="form-control" />
-                <span asp-validation-for="@Model.Walk.WalkerId" class="text-danger"></span>
+                <label asp-for="Walk.WalkerId" class="control-label"></label>
+                <select asp-for="Walk.WalkerId" class="form-control">
+                    <option value="">Select Walker</option>
+                    @foreach (Walker walker in Model.Walkers)
+                    {
+                        <option value="@walker.Id">@walker.Name</option>
+                    }
+                </select>
             </div>
             <div class="form-group">
-                <label asp-for="@Model.Walk.DogId" class="control-label"></label>
-                <input asp-for="@Model.Walk.DogId" class="form-control" />
-                <span asp-validation-for="@Model.Walk.DogId" class="text-danger"></span>
+                <label asp-for="Walk.DogId" class="control-label"></label>
+                <select multiple asp-for="ChosenDogIds" class="form-control">
+                    <option value="">Select Dog(s)</option>
+                    @foreach (Dog dog in Model.Dogs)
+                    {
+                        <option value="@dog.Id">@dog.Name</option>
+                    }
+                </select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -47,5 +57,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
